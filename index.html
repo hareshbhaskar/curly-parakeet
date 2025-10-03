@@ -1,0 +1,335 @@
+<!--
+Wedding website single-file template
+Features included:
+- Single HTML file with embedded CSS & JS
+- Responsive layout, navigation, hero, sections: Home, Our Story, Events, Schedule, RSVP, Registry, Gallery, Contact
+- RSVP form that stores submissions in the browser (localStorage) so you can test without a backend
+- Admin view available at the URL with ?admin=1 (shows saved RSVPs and lets you export them as CSV)
+- Instructions below show how to connect a real form backend (Formspree) and how to host on GitHub Pages
+
+How to use:
+1) Download this file and rename it e.g. "index.html".
+2) Edit the placeholder text (names, dates, venue, registry links, images).
+3) Option A (quick, free): Host on GitHub Pages by pushing this file to a repository's main branch and enabling Pages (see instructions at the bottom of this file).
+4) Option B (to collect RSVP on the web): connect the RSVP form to Formspree or Google Forms — instructions below.
+
+NOTE: Browser-stored RSVPs are only local to your browser. To collect real responses, follow the Formspree instructions below (free tier available) or point the form to a Google Form.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Emma & Alex — Our Wedding</title>
+  <style>
+    :root{--accent:#c47c6b;--bg:#fbf7f5;--muted:#666}
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; background:var(--bg); color:#111}
+    a{color:var(--accent); text-decoration:none}
+    header{backdrop-filter:saturate(120%) blur(6px); position:sticky; top:0; z-index:40; background:rgba(255,255,255,0.66); border-bottom:1px solid rgba(0,0,0,0.06)}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    nav{display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#f3b6a7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    .menu{display:flex;gap:18px}
+    .menu a{padding:8px 6px;border-radius:8px}
+    .hero{display:grid;grid-template-columns:1fr 360px;gap:36px;align-items:center;padding:56px 0}
+    .hero .text h1{font-size:36px;margin:0 0 8px}
+    .hero .text p{margin:0 0 16px;color:var(--muted)}
+    .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(20,20,40,0.06)}
+    .photo{width:100%;height:100%;border-radius:12px;object-fit:cover}
+    section{padding:36px 0}
+    h2{margin:0 0 12px;font-size:22px}
+    .grid{display:grid;gap:16px}
+    .two{grid-template-columns:repeat(2,1fr)}
+    .three{grid-template-columns:repeat(3,1fr)}
+    .rsvp-form input,.rsvp-form select,.rsvp-form textarea{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #e6e6e6}
+    .btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;border:none;cursor:pointer}
+    .muted{color:var(--muted)}
+    footer{padding:24px 0;color:var(--muted);text-align:center}
+    /* Mobile adjustments */
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr;}
+      .menu{display:none}
+      .mobile-menu{display:block}
+    }
+    @media(min-width:901px){ .mobile-menu{display:none} }
+    /* Gallery */
+    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    @media(max-width:700px){.gallery{grid-template-columns:repeat(2,1fr)}}
+    /* Admin badge */
+    .admin-badge{position:fixed;right:14px;bottom:14px;background:#222;color:#fff;padding:8px 10px;border-radius:10px;font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <div class="logo">E&A</div>
+          <div>
+            <div style="font-weight:700">Emma & Alex</div>
+            <div style="font-size:12px;color:var(--muted)">June 21, 2026 • Hampshire, UK</div>
+          </div>
+        </div>
+        <div class="menu">
+          <a href="#home">Home</a>
+          <a href="#story">Our Story</a>
+          <a href="#event">Event</a>
+          <a href="#schedule">Schedule</a>
+          <a href="#rsvp">RSVP</a>
+          <a href="#registry">Registry</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="mobile-menu">
+          <button onclick="scrollToSection('rsvp')" class="btn">RSVP</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="home" class="hero">
+      <div class="text">
+        <h1>You're invited to our wedding</h1>
+        <p class="muted">Join us as we celebrate — ceremony at 2:00pm followed by drinks, dinner and dancing.</p>
+        <div style="display:flex;gap:12px;margin-top:14px">
+          <button class="btn" onclick="scrollToSection('rsvp')">RSVP</button>
+          <a class="btn" style="background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06)" href="#event">Event details</a>
+        </div>
+      </div>
+      <div class="card">
+        <img class="photo" src="https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="engagement">
+      </div>
+    </section>
+
+    <section id="story">
+      <div class="card">
+        <h2>Our Story</h2>
+        <p class="muted">We met at university, bonded over terrible coffee and an even worse attempt at karaoke. Fast forward: a seaside proposal and countless adventures later, we're tying the knot.</p>
+      </div>
+    </section>
+
+    <section id="event">
+      <div class="card">
+        <h2>Event Details</h2>
+        <div class="two grid">
+          <div>
+            <h3 style="margin:6px 0 8px">Ceremony</h3>
+            <p class="muted">St. Mary's Church, High Street, Winchester<br>2:00 PM — Saturday, June 21, 2026</p>
+            <h3 style="margin:12px 0 8px">Reception</h3>
+            <p class="muted">The Old Barn, Oak Lane — dinner & dancing to follow</p>
+          </div>
+          <div>
+            <h3 style="margin:6px 0 8px">Travel & Stay</h3>
+            <p class="muted">Nearest train station: Winchester. A shuttle will run from the station to the venue after the ceremony. We have blocked rooms at The Crown Hotel — mention "Emma & Alex" for a special rate.</p>
+            <h3 style="margin:12px 0 8px">Dress Code</h3>
+            <p class="muted">Smart casual. Outdoor lawn games — bring comfortable shoes!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="schedule">
+      <div class="card">
+        <h2>Schedule</h2>
+        <ul class="muted">
+          <li><strong>13:30</strong> Guests arrive / welcome drinks</li>
+          <li><strong>14:00</strong> Ceremony</li>
+          <li><strong>15:30</strong> Drinks & photos</li>
+          <li><strong>18:00</strong> Dinner</li>
+          <li><strong>20:00</strong> Dancing</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="rsvp">
+      <div class="card rsvp-form">
+        <h2>RSVP</h2>
+        <p class="muted">Please let us know if you can make it. If you'd rather not use this form, email us at <a href="mailto:emmaandalex@example.com">emmaandalex@example.com</a></p>
+
+        <!-- To integrate with Formspree, set the form's action to your Formspree endpoint and remove the event.preventDefault() in the JS below. -->
+        <form id="rsvpForm">
+          <label>Full name</label>
+          <input name="name" id="name" required placeholder="e.g. Sarah Taylor">
+
+          <label>Will you attend?</label>
+          <select name="attend" id="attend">
+            <option value="yes">Yes — I/We will attend</option>
+            <option value="no">No — sadly can't make it</option>
+            <option value="maybe">Maybe</option>
+          </select>
+
+          <label>Number of guests (including you)</label>
+          <input type="number" name="guests" id="guests" min="1" value="1">
+
+          <label>Dietary requirements</label>
+          <input name="diet" id="diet" placeholder="Vegetarian / Gluten free / None">
+
+          <label>Message (optional)</label>
+          <textarea name="message" id="message" rows="3" placeholder="Anything you'd like to tell us"></textarea>
+
+          <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+            <button class="btn" type="submit">Send RSVP</button>
+            <div id="rsvpStatus" class="muted" aria-live="polite"></div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="registry">
+      <div class="card">
+        <h2>Registry</h2>
+        <p class="muted">Your presence is the greatest gift. If you'd like to give something, we've put together a few options:</p>
+        <ul>
+          <li><a href="#">Zola registry</a></li>
+          <li><a href="#">Honeymoon fund</a></li>
+          <li><a href="#">Charity donation (we love trees)</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="card">
+        <h2>Gallery</h2>
+        <div class="gallery">
+          <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo1">
+          <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo2">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo3">
+          <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo4">
+          <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo5">
+          <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop&s=placeholder" class="photo" alt="photo6">
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="card">
+        <h2>Contact</h2>
+        <p class="muted">Questions? Email <a href="mailto:emmaandalex@example.com">emmaandalex@example.com</a> or call +44 7700 900000</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="max-width:900px;margin:0 auto;color:var(--muted)">Made with ❤️ — feel free to edit this file. Admin view: visit this page with <code>?admin=1</code> to see RSVPs.</div>
+    </div>
+  </footer>
+
+  <div id="adminBadge" class="admin-badge" style="display:none">Admin mode</div>
+
+  <script>
+    // Smooth scrolling helper
+    function scrollToSection(id){
+      document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    // RSVP handling (stores to localStorage)
+    const form = document.getElementById('rsvpForm');
+    const status = document.getElementById('rsvpStatus');
+
+    function getRSVPs(){
+      try{ return JSON.parse(localStorage.getItem('wedding_rsvps')||'[]'); }catch(e){return[]}
+    }
+    function saveRSVP(obj){
+      const arr = getRSVPs(); arr.push(obj); localStorage.setItem('wedding_rsvps', JSON.stringify(arr));
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('name').value.trim(),
+        attend: document.getElementById('attend').value,
+        guests: document.getElementById('guests').value,
+        diet: document.getElementById('diet').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Basic client-side validation
+      if(!data.name){ status.textContent='Please enter your name.'; return; }
+
+      // If you want to use a backend service like Formspree, replace this block with a fetch() to your endpoint.
+      saveRSVP(data);
+      status.textContent='Thanks — your RSVP has been saved.';
+      form.reset();
+
+      // small visual cue
+      setTimeout(()=>status.textContent='',4000);
+    });
+
+    // Admin view: show list and allow export
+    function renderAdmin(){
+      const params = new URLSearchParams(location.search);
+      if(!params.get('admin')) return;
+      document.getElementById('adminBadge').style.display='block';
+      const rsvps = getRSVPs();
+      const root = document.createElement('div');
+      root.style.position='fixed';root.style.left='14px';root.style.bottom='14px';root.style.right='14px';root.style.maxHeight='60vh';root.style.overflow='auto';root.style.background='#fff';root.style.padding='12px';root.style.borderRadius='12px';root.style.boxShadow='0 10px 40px rgba(0,0,0,0.08)';root.style.zIndex=9999;
+      const h = document.createElement('h3'); h.textContent='Saved RSVPs'; root.appendChild(h);
+      if(rsvps.length===0){ const p=document.createElement('p'); p.textContent='No RSVPs yet.'; root.appendChild(p);}else{
+        const table = document.createElement('table'); table.style.width='100%'; table.style.borderCollapse='collapse';
+        const thead = document.createElement('thead'); thead.innerHTML='<tr><th style="text-align:left;padding:6px">Name</th><th style="text-align:left;padding:6px">Attend</th><th style="text-align:left;padding:6px">Guests</th><th style="text-align:left;padding:6px">Diet</th><th style="text-align:left;padding:6px">Message</th><th style="text-align:left;padding:6px">When</th></tr>';
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        rsvps.forEach(r=>{
+          const tr = document.createElement('tr'); tr.innerHTML = `<td style="padding:6px;border-top:1px solid #f1f1f1">${escapeHtml(r.name)}</td><td style="padding:6px;border-top:1px solid #f1f1f1">${r.attend}</td><td style="padding:6px;border-top:1px solid #f1f1f1">${r.guests}</td><td style="padding:6px;border-top:1px solid #f1f1f1">${escapeHtml(r.diet)}</td><td style="padding:6px;border-top:1px solid #f1f1f1">${escapeHtml(r.message)}</td><td style="padding:6px;border-top:1px solid #f1f1f1">${(new Date(r.timestamp)).toLocaleString()}</td>`;
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody); root.appendChild(table);
+        const btn = document.createElement('button'); btn.className='btn'; btn.style.marginTop='10px'; btn.textContent='Export CSV'; btn.onclick = ()=>{ exportCSV(rsvps); };
+        root.appendChild(btn);
+      }
+      const closeBtn = document.createElement('button'); closeBtn.textContent='Close'; closeBtn.style.marginLeft='10px'; closeBtn.onclick=()=>root.remove(); root.appendChild(closeBtn);
+      document.body.appendChild(root);
+    }
+
+    function exportCSV(arr){
+      if(!arr || arr.length===0) return alert('No RSVPs to export');
+      const header = Object.keys(arr[0]);
+      const lines = [header.join(',')];
+      arr.forEach(o=>{ lines.push(header.map(h=>`"${(o[h]||'').toString().replace(/"/g,'""')}"`).join(',')); });
+      const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='rsvps.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(s){ if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    renderAdmin();
+
+    // Helpful: if user wants to connect a backend, they can swap the form submission with fetch()
+    // Example: Formspree (free tier) -> set form action to https://formspree.io/f/{your-id} and remove e.preventDefault()
+    // Example snippet to send form JSON via fetch:
+    // fetch('https://formspree.io/f/yourid', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)})
+
+  </script>
+
+  <!--
+  DEPLOY TO GITHUB PAGES (free):
+  1) Create a new repository on GitHub (e.g. "wedding-site").
+  2) Commit this file as index.html to the repository's default branch (main or master).
+  3) In repo Settings -> Pages (or in the Pages sidebar), set the site source to the branch (main) and folder (root). Save.
+  4) After a minute, your site will be live at https://<your-github-username>.github.io/<repo-name>/ or if repo is named <username>.github.io it will be at https://<username>.github.io/
+
+  OPTIONAL: Using Formspree to collect RSVPs (recommended for real responses):
+  - Sign up at https://formspree.io and create a new form; you'll get an endpoint like https://formspree.io/f/xyz
+  - Replace the <form id="rsvpForm"> with: <form action="https://formspree.io/f/xyz" method="POST" enctype="multipart/form-data"> and remove the JS's e.preventDefault() so the form posts to Formspree.
+  - Formspree's free tier covers many simple sites; check their docs for spam protection and email notifications.
+
+  OPTIONAL: Use Google Forms for RSVP collection
+  - Create a Google Form with the fields you need and copy the form's "Send" -> Embed HTML or direct link.
+  - Replace the RSVP section with the embed code or a link to the Google Form.
+
+  CUSTOM DOMAIN on GitHub Pages:
+  - Buy a domain (example.com). In GitHub repo -> Settings -> Pages -> Custom domain, enter it.
+  - Add the required DNS records (A or CNAME) at your domain registrar - GitHub provides exact records.
+
+  NEED HELP CUSTOMISING?: If you'd like, tell me what to change (names, date, venue, palette) and I'll update the file.
+  -->
+</body>
+</html>
